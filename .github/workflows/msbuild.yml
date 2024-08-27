@@ -5,8 +5,10 @@ on:
     branches: [ "master" ]
   pull_request:
     branches: [ "master" ]
+
 permissions:
   contents: read
+
 jobs:
   build:
     runs-on: windows-2022
@@ -14,11 +16,23 @@ jobs:
       matrix:
         toolset: [v143, ClangCL]
         configuration: [Debug, Release]
+
     steps:
     - name: setup actions
       uses: actions/checkout@v3
+
     - name: setup environment
       uses: microsoft/setup-msbuild@v1.1
+
     - name: build
       shell: cmd
       run: msbuild asphyxia.sln /p:Configuration=${{matrix.configuration}} /p:Platform=x64 /p:PlatformToolset=${{ matrix.toolset }}
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: asphyxia-${{ matrix.configuration }}-${{ matrix.toolset }}
+        path: |
+          **/*.exe
+          **/*.dll
+        if-no-files-found: error
